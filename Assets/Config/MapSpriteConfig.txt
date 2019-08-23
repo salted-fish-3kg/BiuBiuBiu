@@ -1,0 +1,1 @@
+[{"name":"33333","address":"factory_tileset","Rect":"{\"x\":0,\"y\":496,\"height\":16,\"width\":16}"},{"name":"23","address":"factory_tileset","Rect":"{\"x\":64,\"y\":496,\"height\":16,\"width\":16}"}]

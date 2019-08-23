@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Knight.Skill.SkillManager">
+    <Position X="0.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAQAABAAACAQAAgAAAAAAAAAAAAAAIAAAABgAAAAAAA=</HashCode>
+      <FileName>Assets\Script\Skill\SkillManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Knight.Skill.SkillFactory">
+    <Position X="4.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAQAAAAAAAAABAAAAAAAEAAAAAAEAAIAAA=</HashCode>
+      <FileName>Assets\Script\Skill\SkillFactory.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SkillData" Collapsed="true">
+    <Position X="2.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAQAAAAAAAQAoAAABAAAAAASAAAFAAAAAEBAAAAABAA=</HashCode>
+      <FileName>Assets\Script\Skill\SkillData.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Knight.Skill.ISkillSelect" Collapsed="true">
+    <Position X="6.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Script\Skill\SkillFactory.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Knight.Skill.ISkillEffect" Collapsed="true">
+    <Position X="6.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Script\Skill\SkillFactory.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>
