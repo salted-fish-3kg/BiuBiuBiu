@@ -1,5 +1,6 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class MapGenerater : MonoBehaviour
@@ -7,10 +8,15 @@ public class MapGenerater : MonoBehaviour
     public MapManager MapManager;
     int width;
     int height;
+    [SerializeField, Range(0, 1f)]
+    float probability;
+    int count;
     BlockType[,] map;
+    bool ansyIsOK;
+    System.Random random;
     private void Start()
     {
-
+        random = new System.Random();
     }
     private void Update()
     {
@@ -29,20 +35,49 @@ public class MapGenerater : MonoBehaviour
         }
         return map;
     }
+    public void GenerateMapAsyn(int width, int height, int count)
+    {
+        this.width = width;
+        this.height = height;
+        this.count = count;
+        Thread thread = new Thread(new ThreadStart(GenerateMap));
+        thread.Start();
+    }
+    public bool GenerateState()
+    {
+        return ansyIsOK;
+    }
+    public BlockType[,] GetMap()
+    {
+        return map;
+    }
+
+    private void GenerateMap()
+    {
+        map = new BlockType[width, height];
+        map = RandomFillMapBlock(map);
+        for (int i = 0; i < count; i++)
+        {
+            ObscureMapBlock(map);
+        }
+        ansyIsOK = true;
+    }
+
+
     private BlockType[,] RandomFillMapBlock(BlockType[,] map)
     {
         for (int i = 0; i < map.GetLength(0); i++)
         {
             for (int j = 0; j < map.GetLength(1); j++)
             {
-                map[i, j] = (BlockType)Random.Range(0, 2);
-                Debug.Log("free" + map[i, j]);
+                map[i, j] = RandomBlock();
             }
         }
         return map;
     }
-    public BlockType[,] ObscureMapBlock(BlockType[,] map)
+    private BlockType[,] ObscureMapBlock(BlockType[,] map)
     {
+        Debug.Log(System.DateTime.Now.ToString());
         for (int i = 0; i < map.GetLength(0); i++)
         {
             for (int j = 0; j < map.GetLength(1); j++)
@@ -52,9 +87,9 @@ public class MapGenerater : MonoBehaviour
                     map[i, j] = count >= 4 ? BlockType.wall : BlockType.floor;
                 else
                     map[i, j] = count >= 5 ? BlockType.wall : BlockType.floor;
-                Debug.Log(map[i, j]);
             }
         }
+        Debug.Log(System.DateTime.Now.ToString());
         return map;
     }
     private int CheckNeighborwall(int x, int y)
@@ -101,5 +136,11 @@ public class MapGenerater : MonoBehaviour
         x = Mathf.Clamp(x, 0, width - 1);
         y = Mathf.Clamp(y, 0, height - 1);
         return map[x, y];
+    }
+    private BlockType RandomBlock()
+    {
+        float num = random.Next(1, 100);
+        if (num <= 100 * probability) return BlockType.wall;
+        return BlockType.floor;
     }
 }

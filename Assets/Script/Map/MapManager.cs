@@ -1,83 +1,45 @@
-﻿using LitJson;
+using LitJson;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+/// <summary>
+/// map
+/// </summary>
 [Serializable]
 public class MapManager : MonoSingleton<MapManager>
 {
     [SerializeField]
     public MapGenerater mapGenerater;
     public List<MapSprite> mapSprites;
+    public MapAreaCtrl[] mapAreas;
+    private BlockType[,] mapblocks;
     // Start is called before the first frame update
     [SerializeField]
-    int heigth;
-    [SerializeField]
-    int width;
-    private SpriteRenderer[,] maps;
+    public Vector2Int mapAreaSize;
     [SerializeField]
     public Vector2 spriteScale;
     [SerializeField]
     public Vector2 offset;
-    BlockType[,] blockmap;
-    void Start()
+    [SerializeField]
+    public Vector2Int mapSize;
+    bool isOK;
+    protected override void Initialization()
     {
+        base.Initialization();
+        LoadMapConfigFile();
     }
-
-    // Update is called once per frame
-    void Update()
+    private void T1()
     {
+        Thread thread = new Thread(new ThreadStart(CreatMapBlock));
     }
-    [ContextMenu("GenerateMap")]
-    public void DrawGenerateButton()
-    {
-        if (maps == null) maps = new SpriteRenderer[width, heigth];
-        Vector2 cameraPos = Camera.main.transform.position;
-        blockmap = mapGenerater.GenerateMap(width, heigth,5);
-        for (int i = 0; i < heigth; i++)
-        {
-            for (int j = 0; j < width; j++)
-            {
-                SpriteRenderer _sprite = maps[i, j];
-                if (_sprite == null)
-                {
-                    _sprite = CreatSpriteObject(ChoiceSprite(blockmap[i, j]));
-                }
-                else _sprite.sprite = ChoiceSprite(blockmap[i, j]);
-                _sprite.transform.localScale = 5 * Vector2.one;
-                _sprite.transform.localPosition =new Vector2(offset.x * j, offset.y * i);
-                maps[i, j] = _sprite;
-            }
-        }
-    }
-    [ContextMenu("DrawMap")]
-    public void DrawMap()
-    {
-        blockmap = mapGenerater.ObscureMapBlock(blockmap);
-        StartCoroutine(SetMaps(blockmap));
-    }
-    
-    IEnumerator SetMaps(BlockType[,] blocks)
-    {
-        for (int i = 0; i < maps.GetLength(0); i++)
-        {
-            for (int j = 0; j < maps.GetLength(1); j++)
-            {
-               if(maps[i, j].sprite == ChoiceSprite(blocks[i, j]))continue;
-                maps[i, j].sprite = ChoiceSprite(blocks[i, j]);
-                yield return new WaitForSeconds(0.05f);
-            }
-        }
-    }
-    [ContextMenu("ClearMap")]
-    public void ClearMap()
-    {
-        do
-        {
-            DestroyImmediate(transform.GetChild(0).gameObject);
-        } while (transform.childCount != 0);
-    }
-    private Sprite ChoiceSprite(BlockType block)
+    /// <summary>
+    /// 获取sprite
+    /// </summary>
+    /// <param name="block"></param>
+    /// <returns></returns>
+    public Sprite ChoiceSprite(BlockType block)
     {
         switch (block)
         {
@@ -87,6 +49,11 @@ public class MapManager : MonoSingleton<MapManager>
                 return mapSprites[1].icon;
         }
     }
+    /// <summary>
+    /// 生成SpriteRender;
+    /// </summary>
+    /// <param name="sprite"></param>
+    /// <returns></returns>
     private SpriteRenderer CreatSpriteObject(Sprite sprite)
     {
         GameObject _obj = new GameObject();
@@ -95,6 +62,9 @@ public class MapManager : MonoSingleton<MapManager>
         renderer.sprite = sprite;
         return renderer;
     }
+    /// <summary>
+    /// 加载地图本地配置文件
+    /// </summary>
     [ContextMenu("LoadMapConfigFile")]
     private void LoadMapConfigFile()
     {
@@ -116,7 +86,210 @@ public class MapManager : MonoSingleton<MapManager>
             mapSprites.Add(new MapSprite() { name = name, icon = sprite });
         }
     }
+    #region 初始化地图
+    public void InitMapComponentCoroutine()
+    {
+        mapGenerater.GenerateMapAsyn(mapSize.x * mapAreaSize.x, mapSize.y * mapAreaSize.y, 5);
+        StartCoroutine(InitMapComponent());
+    }
+    IEnumerator InitMapComponent()
+    {
+        //CreatMapBlock();
+        yield return new WaitUntil(mapGenerater.GenerateState);
+        mapblocks = mapGenerater.GetMap();
+        CreatMapArea();
+        SetMapAreaPos();
+        yield break;
+    }
+    private bool test()
+    {
+        CreatMapBlock();
+        CreatMapArea();
+        SetMapAreaPos();
+        return true;
+    }
+    /// <summary>
+    /// 初始化MapAreaCtrl
+    /// </summary>
+    public void CreatMapArea()
+    {
+        mapAreas = new MapAreaCtrl[9];
+        for (int i = 0; i < 9; i++)
+        {
+            GameObject _obj = new GameObject();
+            _obj.name = "mapArea_" + i;
+            _obj.transform.SetParent(transform);
+            MapAreaCtrl _mapArea = _obj.AddComponent<MapAreaCtrl>();
+            mapAreas[i] = _mapArea;
+            _mapArea.Initialized();
+        }
+    }
+    private void SetMapAreaPos()
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            int y = i / 3;
+            int x = i % 3;
+            mapAreas[i].Order = new Vector2Int(x - 1, y - 1);
+            SetMapAreaBlock(mapAreas[i]);
+            mapAreas[i].UpdataMap();
+        }
+        //transform.position = -Vector3.Lerp(mapAreas[8].transform.position, mapAreas[4].transform.position, 0.5f);
+    }
+    //private void GetMapBlock()
+    //{
+    //    mapblocks = mapGenerater.GenerateMap(mapSize.x * mapAreaSize.x, mapSize.y * mapAreaSize.y, 4);
+    //}
+    private void CreatMapBlock()
+    {
+        mapblocks = mapGenerater.GenerateMap(mapSize.x * mapAreaSize.x, mapSize.y * mapAreaSize.y, 5);
+        isOK = true;
+    }
+    private bool Task2()
+    {
+        Debug.Log(isOK);
+        return isOK;
+    }
+    private void SetMapAreaBlock(MapAreaCtrl areaCtrl)
+    {
+        Vector2Int _pos = areaCtrl.Order;
+        _pos = _pos + Vector2Int.one * 4;
+        for (int i = 0; i < mapAreaSize.y; i++)
+        {
+            for (int j = 0; j < mapAreaSize.x; j++)
+            {
+                areaCtrl.mapblock[i, j] = mapblocks[i + _pos.y * 25, j + _pos.x * 25];
+            }
+        }
+    }
+    #endregion
+    #region 切换地图区域
+    private void MoveRight()
+    {
+        int _min = mapAreas[0].Order.x;
+        for (int i = 0; i < 3; i++)
+        {
+            if (mapAreas[i].Order.x < _min) _min = mapAreas[i].Order.x;
+        }
+        for (int i = 0; i < mapAreas.Length; i++)
+        {
+            if (mapAreas[i].Order.x == _min)
+            {
+                mapAreas[i].Order = new Vector2Int(mapAreas[i].Order.x + 3, mapAreas[i].Order.y);
+                SetMapAreaBlock(mapAreas[i]);
+                mapAreas[i].UpdataMap();
+            }
+        }
+    }
+    private void MoveLeft()
+    {
+        int _max = mapAreas[0].Order.x;
+        for (int i = 0; i < 3; i++)
+        {
+            if (mapAreas[i].Order.x > _max) _max = mapAreas[i].Order.x;
+        }
+        for (int i = 0; i < mapAreas.Length; i++)
+        {
+            if (mapAreas[i].Order.x == _max)
+            {
+                if ((mapAreas[i].Order.x - 3) - 4 < 0) return;
+                mapAreas[i].Order = new Vector2Int(mapAreas[i].Order.x - 3, mapAreas[i].Order.y);
+                SetMapAreaBlock(mapAreas[i]);
+                mapAreas[i].UpdataMap();
+            }
+        }
+    }
+    private void MoveUp()
+    {
+        int _min = mapAreas[0].Order.y;
+        Debug.Log(_min);
+        for (int i = 0; i < 3; i++)
+        {
+            if (mapAreas[i * 3].Order.y < _min) _min = mapAreas[i * 3].Order.y;
+        }
+        Debug.Log(_min);
+        for (int i = 0; i < mapAreas.Length; i++)
+        {
+            if (mapAreas[i].Order.y == _min)
+            {
+                mapAreas[i].Order = new Vector2Int(mapAreas[i].Order.x, mapAreas[i].Order.y + 3);
+                SetMapAreaBlock(mapAreas[i]);
+                mapAreas[i].UpdataMap();
+            }
+        }
+    }
+    private void MoveDown()
+    {
+        int _max = mapAreas[0].Order.y;
+        for (int i = 0; i < 3; i++)
+        {
+            if (mapAreas[i * 3].Order.y > _max) _max = mapAreas[i * 3].Order.y;
+        }
+        for (int i = 0; i < mapAreas.Length; i++)
+        {
+            if (mapAreas[i].Order.y == _max)
+            {
+                mapAreas[i].Order = new Vector2Int(mapAreas[i].Order.x, mapAreas[i].Order.y - 3);
+                SetMapAreaBlock(mapAreas[i]);
+                mapAreas[i].UpdataMap();
+            }
+        }
+    }
+    #endregion
+    private void ChangeMapCenter(MapAreaCtrl mapArea)
+    {
+        Vector2Int _pos = mapArea.Order + Vector2Int.one * 5;
+
+    }
+    bool key_wDown = false;
+    bool key_sDown = false;
+    bool key_aDown = false;
+    bool key_dDown = false;
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.W) && (!key_wDown))
+        {
+            key_wDown = true;
+            Debug.Log("MoveUp");
+            MoveUp();
+        }
+        if (Input.GetKeyUp(KeyCode.W))
+        {
+            key_wDown = false;
+        }
+        if (Input.GetKeyDown(KeyCode.S) && (!key_sDown))
+        {
+            key_sDown = true;
+            Debug.Log("MoveUp");
+            MoveDown();
+        }
+        if (Input.GetKeyUp(KeyCode.S))
+        {
+            key_sDown = false;
+        }
+        if (Input.GetKeyDown(KeyCode.A) && (!key_aDown))
+        {
+            key_aDown = true;
+            Debug.Log("MoveUp");
+            MoveLeft();
+        }
+        if (Input.GetKeyUp(KeyCode.A))
+        {
+            key_aDown = false;
+        }
+        if (Input.GetKeyDown(KeyCode.D) && (!key_dDown))
+        {
+            key_dDown = true;
+            Debug.Log("MoveUp");
+            MoveRight();
+        }
+        if (Input.GetKeyUp(KeyCode.D))
+        {
+            key_dDown = false;
+        }
+    }
 }
+
 public struct MapUnit
 {
     string spriteName;
