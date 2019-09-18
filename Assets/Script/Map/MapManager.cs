@@ -192,7 +192,7 @@ public class MapManager : MonoSingleton<MapManager>
         {
             if (mapAreas[i].Order.x == _max)
             {
-                if ((mapAreas[i].Order.x - 3) - 4 < 0) return;
+                if ((mapAreas[i].Order.x - 3) + 4 < 0) return;
                 mapAreas[i].Order = new Vector2Int(mapAreas[i].Order.x - 3, mapAreas[i].Order.y);
                 SetMapAreaBlock(mapAreas[i]);
                 mapAreas[i].UpdataMap();
@@ -260,7 +260,7 @@ public class MapManager : MonoSingleton<MapManager>
         if (Input.GetKeyDown(KeyCode.S) && (!key_sDown))
         {
             key_sDown = true;
-            Debug.Log("MoveUp");
+            Debug.Log("MoveDown");
             MoveDown();
         }
         if (Input.GetKeyUp(KeyCode.S))
@@ -270,7 +270,7 @@ public class MapManager : MonoSingleton<MapManager>
         if (Input.GetKeyDown(KeyCode.A) && (!key_aDown))
         {
             key_aDown = true;
-            Debug.Log("MoveUp");
+            Debug.Log("MoveLeft");
             MoveLeft();
         }
         if (Input.GetKeyUp(KeyCode.A))
@@ -280,7 +280,7 @@ public class MapManager : MonoSingleton<MapManager>
         if (Input.GetKeyDown(KeyCode.D) && (!key_dDown))
         {
             key_dDown = true;
-            Debug.Log("MoveUp");
+            Debug.Log("MoveRight");
             MoveRight();
         }
         if (Input.GetKeyUp(KeyCode.D))

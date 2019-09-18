@@ -19,6 +19,8 @@ public class MapManagerEditor : Editor
     SerializedProperty mapGenerate;
     SerializedProperty offset;
     SerializedProperty spriteScale;
+    SerializedProperty mapAreaSize;
+    SerializedProperty mapSize;
     //SerializedProperty manSize;
     private void Awake()
     {
@@ -30,6 +32,8 @@ public class MapManagerEditor : Editor
         mapGenerate = serializedObject.FindProperty("mapGenerater");
         offset = serializedObject.FindProperty("offset");
         spriteScale = serializedObject.FindProperty("spriteScale");
+        mapAreaSize = serializedObject.FindProperty("mapAreaSize");
+        mapSize = serializedObject.FindProperty("mapSize");
         //mapSize = serializedObject.FindProperty("mapSize");
         CreateReorderableList();
         SetupReordierableHeaderDrawer();
@@ -82,13 +86,8 @@ public class MapManagerEditor : Editor
     {
         //EditorGUILayout.PropertyField(mapSize, true);
         //EditorGUILayout.PropertyField(mapSize, true);
-
-        SerializedProperty heigth = serializedObject.FindProperty("heigth");
-        SerializedProperty width = serializedObject.FindProperty("width");
-        Vector2Int _vector = new Vector2Int(width.intValue, heigth.intValue);
-        _vector = EditorGUILayout.Vector2IntField("MapSize", _vector);
-        heigth.intValue = _vector.y;
-        width.intValue = _vector.x;
+        EditorGUILayout.PropertyField(mapSize);
+        EditorGUILayout.PropertyField(mapAreaSize);
         //    GUILayout.TextField("2333");
         //    length.intValue = EditorGUI.IntField(new Rect() { position = _position }, "Length", length.intValue);
         //    width.intValue = EditorGUI.IntField(new Rect() { position = new Vector2(_position.x + 30, _position.y) }, "Width", width.intValue);

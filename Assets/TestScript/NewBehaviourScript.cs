@@ -46,7 +46,7 @@ public class NewBehaviourScript : MonoBehaviour
     {
         if (GUILayout.Button("RegSubject"))RegSubject();
         if (GUILayout.Button("remove")) RegOb();
-        if (GUILayout.Button("notify")) EnemyManager.Instance.CreatEnemy("Ball");
+        if (GUILayout.Button("notify")) MapManager.Instance.InitMapComponentCoroutine();
     }
     public bool CanPlaceFlowers(int[] flowerbed, int n)
     {
