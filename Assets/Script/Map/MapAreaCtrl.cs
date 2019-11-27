@@ -12,6 +12,7 @@ public class MapAreaCtrl : MonoBehaviour
     [SerializeField]
     private Vector2Int order;
     SpriteRenderer[,] renderers;
+    Vector2 collider_size;
     public Vector2Int Order
     {
         set
@@ -45,6 +46,10 @@ public class MapAreaCtrl : MonoBehaviour
         renderers[i, j] = _obj.AddComponent<SpriteRenderer>();
         _obj.transform.localPosition = new Vector2(MapManager.Instance.offset.x * j, MapManager.Instance.offset.y * i);
         _obj.transform.localScale = MapManager.Instance.spriteScale;
+        BoxCollider2D _collider2D = _obj.AddComponent<BoxCollider2D>();
+        Vector2 collider_size = new Vector2(MapManager.Instance.mapSprites[0].icon.rect.size.x * MapManager.Instance.spriteScale.x / 1000, MapManager.Instance.mapSprites[0].icon.rect.size.y * MapManager.Instance.spriteScale.y / 1000);
+        _collider2D.size = collider_size * 2;
+        _collider2D.offset = collider_size;
     }
     #endregion
     /// <summary>
@@ -69,6 +74,7 @@ public class MapAreaCtrl : MonoBehaviour
     private void SetSpriteObject(SpriteRenderer spriteRenderer, int i, int j)
     {
         renderers[i, j].sprite = MapManager.Instance.ChoiceSprite(mapblock[i, j]);
+       
     }
     #endregion
     void ForeachMapArea<T>(T[,] list, Action<T, int, int> func)

@@ -29,18 +29,25 @@ namespace Knight.Tools.Timer
                 Delay delay;
                 if (!delays.TryGetValue(keys[i], out delay)) return;
                 if(Time.time < delay.delayTime) continue;
-                if (delay.doTimes < 1)
+                if (delay.doTimes < 1&&delay.doTimes!=-1)
                 {
+                    Debug.Log(delay.name + "||"+delay.doTimes);
+                    delay.doTimes--;
                     removeList.Add(keys[i]);
                     continue;
                 }
                 delay.delayTime += delay.intervalTime;
                 delay.Doing();
-                delay.doTimes--;
             }
             Remove();
         }
-        private void Remove()
+
+        internal static void Delayer(string v1, int v2, int v3, float v4, object v5)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void Remove()
         {
             if (removeList.Count <= 0) return;
             for (int i = removeList.Count - 1; i >= 0; i--)
@@ -49,7 +56,6 @@ namespace Knight.Tools.Timer
                 delays.Remove(removeList[i]);
             }
             removeList.Clear();
-            Debug.Log("Remove");
         }
         protected override void Initialization()
         {

@@ -9,19 +9,8 @@ namespace Knight.Core
 {
     public class Message
     {
+
         public delegate void ListenEvent(params object[] data);
-        private static Message _message;
-        public static Message Instence
-        {
-            get
-            {
-                if (_message == null)
-                {
-                    _message = new Message();
-                }
-                return _message;
-            }
-        }
         //private static Dictionary<string, ListenEvent> message = new Dictionary<string, ListenEvent>();
         //public void AttachEvent(string name, ListenEvent listenEvent)
         //{
@@ -50,23 +39,30 @@ namespace Knight.Core
 
         //    }
         //}
-        private Dictionary<string, Subject> subjects = new Dictionary<string, Subject>();
+        private static Dictionary<string, _Subject> subjects = new Dictionary<string, _Subject>();
+
+        private Message()
+        {
+        }
+
         /// <summary>
         /// 添加监听对象
         /// </summary>
         /// <param name="name"></param>
-        public void AttachSubject(string name)
+        public static Subject AttachSubject(string name)
         {
-            if (subjects.ContainsKey(name)) return;
-            Subject _subject = new Subject();
+            if (subjects.ContainsKey(name)) return null;
+            _Subject _subject = new _Subject();
+            _subject.name = name;
             subjects.Add(name, _subject);
+            return _subject;
         }
         /// <summary>
         /// 移除监听对象
         /// </summary>
         /// <param name="name"></param>
         /// <param name="subject"></param>
-        public void DetachSubject(string name)
+        public static void DetachSubject(string name)
         {
             if (subjects.ContainsKey(name))
                 subjects.Remove(name);
@@ -76,42 +72,63 @@ namespace Knight.Core
         /// </summary>
         /// <param name="name"></param>
         /// <param name="listenEvent"></param>
-        public void AttachObseverEvent(string name, ListenEvent listenEvent)
+        public static void AttachObseverEvent(string name, ListenEvent listenEvent)
         {
-            Subject _subject;
-            if (subjects.TryGetValue(name, out _subject))
+            _Subject _subject;
+            if (!subjects.TryGetValue(name, out _subject))
             {
-                _subject.listen += listenEvent;
+                AttachSubject(name);
             }
+            subjects.TryGetValue(name, out _subject);
+            _subject.listen += listenEvent;
         }
         /// <summary>
         /// 移除监听事件
         /// </summary>
         /// <param name="name"></param>
         /// <param name="listenEvent"></param>
-        public void DetachObseverEvent(string name, ListenEvent listenEvent)
+        public static void DetachObseverEvent(string name, ListenEvent listenEvent)
         {
-            Subject _subject;
+            _Subject _subject;
             if (subjects.TryGetValue(name, out _subject))
             {
                 _subject.listen -= listenEvent;
             }
         }
-        public void Notify(string name,params object[] data)
+        public static void Notify(string name, params object[] data)
         {
-            Subject _subject;
-            if (subjects.TryGetValue(name,out _subject))
+            _Subject _subject;
+            if (subjects.TryGetValue(name, out _subject))
             {
                 _subject.Notify(data);
             }
         }
-        internal class Subject
+        internal class _Subject : Subject
         {
             internal ListenEvent listen;
-            public void Notify(params object[] data)
+            public string name;
+            public override void Detach()
             {
+                DetachSubject(name);
+            }
+
+            public override string Name()
+            {
+                return name;
+            }
+
+            public override void Notify(params object[] data)
+            {
+                if (listen == null) return;
                 listen(data);
             }
+
         }
+    }
+    public abstract class Subject
+    {
+        public abstract void Notify(params object[] data);
+        public abstract void Detach();
+        public abstract string Name();
     }
 }

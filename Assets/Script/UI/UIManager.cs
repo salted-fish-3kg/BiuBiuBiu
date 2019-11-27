@@ -19,17 +19,7 @@ namespace Knight.UI
     {
         TipsPanel Tips;
         Vector2 screenScale;
-        // Use this for initialization
-        void Start()
-        {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-        }
-        Dictionary<string, UIPanel> panels;
+        static Dictionary<string, UIPanel> panels;
         /// <summary>
         ///显示UIPanel
         /// </summary>
@@ -37,8 +27,8 @@ namespace Knight.UI
         /// <returns></returns>
         public bool DisplayPanel(string name)
         {
-            if (!panels.ContainsKey(name)) LoadUIPanel(name, new Vector2(Screen.width / 2f, Screen.height / 2f));
-            if (!panels.ContainsKey(name)) return false;
+            //if (!panels.ContainsKey(name)) LoadUIPanel(name, new Vector2(Screen.width / 2f, Screen.height / 2f));
+            if (!panels.ContainsKey(name)) LoadUIPanel(name, new Vector2(Screen.width / 2, Screen.height / 2));
             panels[name].Display();
             if (panels[name].IsActive) return true;
             return false;
@@ -83,12 +73,12 @@ namespace Knight.UI
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public bool UI_Status(string name)
+        public static bool UIStatus(string name)
         {
             if (panels.ContainsKey(name)) return false;
             return panels[name].IsActive;
         }
-        public void OpenTips(string title, string tipsText, Action yesTODo, Action noToDo)
+        public static void OpenTips(string title, string tipsText, Action yesTODo, Action noToDo)
         {
 
         }
@@ -105,23 +95,33 @@ namespace Knight.UI
         }
         protected override void Initialization()
         {
+            //transform.SetParent(GameObject.Find("Canvas").transform);
+            DontDestroyOnLoad(gameObject);
             screenScale = new Vector2(Screen.width, Screen.height);
-            Debug.Log(screenScale);
-            base.Initialization();
-            panels = new Dictionary<string, UIPanel>();
-            transform.SetParent(GameObject.Find("Canvas").transform);
+            if (panels == null) panels = new Dictionary<string, UIPanel>();
             LoadUIPanel("TipsPanel", screenScale * 0.5f);
+            HidePanel("TipsPanel");
             Tips = panels["TipsPanel"] as TipsPanel;
         }
         public void LoadUIPanel(string name, Vector2 position)
         {
             GameObject obj = Resources.Load("UI/" + name) as GameObject;
             obj = Instantiate(obj);
-            obj.transform.SetParent(transform.parent);
+            obj.transform.SetParent(transform);
             UIPanel panel = obj.GetComponent<UIPanel>();
+            //panel.Display();
             RectTransform rect = obj.GetComponent<RectTransform>();
             rect.position = position;
-            if (panel != null) panels.Add(name, panel);
+            Debug.Log(name);
+            if (panel != null)
+            {
+                if (panels == null)
+                {
+                    panels = new Dictionary<string, UIPanel>();
+                    Debug.Log(panels);
+                }
+                panels.Add(name, panel);
+            }
         }
     }
 }

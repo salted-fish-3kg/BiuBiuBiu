@@ -7,19 +7,8 @@ using UnityEngine;
 /// </summary>
 namespace Knight.UI
 {
-    public class UIPanel : MonoBehaviour
+    public abstract class UIPanel : MonoBehaviour
     {
-
-        // Use this for initialization
-        void Start()
-        {
-
-        }
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
         public virtual void Display()
         {
             if (gameObject.activeInHierarchy) return;
@@ -29,7 +18,7 @@ namespace Knight.UI
         }
         public virtual void Hide()
         {
-            if (gameObject.activeInHierarchy) return;
+            if (!gameObject.activeInHierarchy) return;
             HidenAnimation();
             gameObject.SetActive(false);
             enabled = false;
